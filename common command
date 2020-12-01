@@ -26,12 +26,23 @@
 查看版本:
   docker version
 
-添加远程程序：
-  docker pull hello-world
+从远处仓库抽取镜像：
+  docker pull 镜像名<:tags>
 
-运行程序
-  docker run hello-world
+查看本地镜像：
+  docker images
+
+创建容器，启动应用
+  docker run 镜像名<:tags>
   
+查看正在运行中的镜像：
+  docker ps
+  
+删除容器：f:force
+  docker rm <-f> 容器id
+  
+删除镜像：
+  docker rmi <-f> 镜像名<:tags>
 阿里云加速服务：
   进入阿里云搜索 "容器镜像服务"
   
@@ -44,3 +55,4 @@
   EOF
   sudo systemctl daemon-reload
   sudo systemctl restart docker
+  
