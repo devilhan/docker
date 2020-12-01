@@ -37,12 +37,27 @@
   
 查看正在运行中的镜像：
   docker ps
-  
+
+停止运行的容器：
+  docker stop 容器id
+
 删除容器：f:force
   docker rm <-f> 容器id
   
 删除镜像：
   docker rmi <-f> 镜像名<:tags>
+  
+启动：
+  前台运行
+  -p: 宿主机与容器的端口映射
+    docker run -p 8000:8080 tomcat
+  后台运行
+  -d：后台运行
+    docker run -p 8000:8080 -d tomcat
+
+查看应用端口号：
+  netstat -tulpn
+
 阿里云加速服务：
   进入阿里云搜索 "容器镜像服务"
   
