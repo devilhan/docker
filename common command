@@ -32,3 +32,15 @@
 运行程序
   docker run hello-world
   
+阿里云加速服务：
+  进入阿里云搜索 "容器镜像服务"
+  
+  
+  sudo mkdir -p /etc/docker
+  sudo tee /etc/docker/daemon.json <<-'EOF'
+  {
+    "registry-mirrors": ["https://address.mirror.aliyuncs.com"]
+  }
+  EOF
+  sudo systemctl daemon-reload
+  sudo systemctl restart docker
