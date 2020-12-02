@@ -34,9 +34,24 @@
 
 创建容器，启动应用
   docker run 镜像名<:tags>
+  或
+  docker create 镜像名<:tags>
+开启已创建的容器：
+  docker start 容器id
+
+暂停运行的容器：
+  docker pause 容器id
   
+停止运行的容器：
+  docker stop 容器id
+  
+从暂停状态恢复运行：
+  docker unpause 容器id
+ 
 查看正在运行中的镜像：
   docker ps
+查看分支（包含暂停状态的容器）：
+  docker ps -a 
 
 停止运行的容器：
   docker stop 容器id
@@ -58,6 +73,55 @@
 查看应用端口号：
   netstat -tulpn
 
+在容器中执行命令：
+  -it  采用交互方式执行命令
+  docker exec [-it] 容器id 命令
+  例子：
+    tomcat容器内部包含jdk及linux
+    docker exec -it tomcat_id /bin/bash
+    由此可以进入tomcat容器内部
+    查看linux版本：
+      cat /proc/version
+    查看jdk版本：
+      java -version
+  退出当前容器：
+    exit  
+默认容器安装地址：
+  /var/lib/docker
+  
+dockerfile 镜像描述文件：包含用于组合镜像命令的文本文档，docker 通过读取dockerfile中的指令按步自动生成镜像
+  docker build -t 机构/镜像名<:tags> dockerfile目录
+
+dockerfile 自动部署tomcat应用
+  FROM tomcat:latest  --设置基准镜像
+  MAINTAINER  devilhan  --维护人员   
+  WORKDIR /usr/local/tomcat/webapps --设置工作目录
+  ADD docker-web ./docker-web 将指定文件复制到镜像指定的目录下
+  ENV JAVA_HOME /usr/local/openjdk8 -- 设置环境变量
+  RUN ${JAVA_HOME}/bin/java -jar test.jar
+  
+  
+  RUN：在Build 构建时执行命令
+  ENTRYPOINT：容器启动时执行的命令  -- 一定会被运行
+  CMD：容器启动后执行默认的命令或参数 -- 不一定被运行
+  
+  RUN 构建时运行：
+    RUN yum install -y vim #shell命令格式
+    RUN ["yum","install","-y","vim"]  #exec命令格式
+  
+镜像分层： 
+  mkdir docker_layer
+  创建dockerfile
+    FROM centos
+    RUN ["echo","aaaa"]
+  
+  FREOM - 基于基准镜像
+    FROM centos #制作基准镜像（基于centos:lastest）
+    FROM scratch #不依赖任何基准镜像base image
+    FROM tomcat:9.0.22-jdk8-openjdk
+    尽量使用官方提供的BaseImage
+    
+    
 阿里云加速服务：
   进入阿里云搜索 "容器镜像服务"
   
