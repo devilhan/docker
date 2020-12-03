@@ -115,16 +115,85 @@ dockerfile 自动部署tomcat应用
     FROM centos
     RUN ["echo","aaaa"]
   
-  FREOM - 基于基准镜像
+  FROM - 基于基准镜像
     FROM centos #制作基准镜像（基于centos:lastest）
     FROM scratch #不依赖任何基准镜像base image
     FROM tomcat:9.0.22-jdk8-openjdk
     尽量使用官方提供的BaseImage
     
+构建Redis 镜像：
+  需要redis.tar.gz 与redis.conf 上传到服务器的某个目录下，例如：/usr/local
+  
+  编辑dockerfile文件:
+    gcc | gcc-c++ : c语言源代码的编译包
+    net-tools : 网络工具包
+    make ：安装程序的必备组件
+    7000端口
+  
+    FROM centos  
+    RUN ["yum","install","-y","gcc","gcc-c++","net-tools","make"]
+    WORKDIR /usr/local
+    ADD redis.tar.gz .
+    WORKDIR /usr/local/redis/src
+    RUN make && make install
+    WORKDIR /usr/local/redis
+    ADD redis.conf
+    EXPOSE 7000  --向外暴露端口
+    CMD ["redis-server","redis.conf"]
+    
+link实现容器间单向通信：
+  首先创建一个tomcat容器：
+    docker run -d --name web --link database tomcat
+  再创建一个数据库：添加it为了一直保持连接状态
+    docker run -d --name database -it centos /bin/bash
+  查看容器的原数据：查看虚拟ip地址
+    docker inspect 容器id
+    
+ Bridge网桥实现多组容器间的双向通信：
+  查看docker 网络明细：
+    docker network ls 
+  创建新网桥 名为my-bridge：
+    docker network create -d bridge my-bridge
+  网络连接  + 容器名称：
+    docker network connect my-bridge web
+    docker network connect my-bridge database
+  在创建网桥时，docker 宿主机会生成一个虚拟网卡，充当网关角色，所以内部可以互联
+  而和外网连接时，需要通过物理网卡
+  
+  Volume 容器间共享数据
+    通过设置 -v 挂载宿主机目录
+      docker run --name 容器名 -v 宿主机路径:容器内挂载路径 镜像名
+    实例：
+      docker run --name t1 -v /usr/webapps:/usr/local/tomcat/webapps tomcat
+    
+    通过 --volumes-from 共享容器内挂载点
+    创建共享容器：
+      docker create --name webpage -v /webapps:/tomcat/webapps tomcat /bin/true
+    共享容器挂载点：
+      docker run --volumes-from webpage --name t1 -d tomcat
+  
+    实例：
+      docker run --name t1 -p 8000:8080 -d -v /usr/webapps:/usr/local/tomcat/webapps tomcat
+  
+    docker create --name webpage -v /usr/webapps:/usr/local/tomcat webapps tomcat /bin/true
+    
+    docker run -p 8002:8080 --volumes-from webpage --name t3 -d tomcat
+  
+  docker compose -- 容器编排工具，单机多容器部署工具
+    通过yml文件定义多容器如何部署
+    WIN/MAC 默认提供docker compose,Linux需要安装
+    
+    参考链接：
+      https://docs.docker.com/compose/install/
+    linux:
+      sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      sudo chmod +x /usr/local/bin/docker-compose
+    安装wordpress:
+      参考链接：
+        https://docs.docker.com/compose/wordpress/
     
 阿里云加速服务：
   进入阿里云搜索 "容器镜像服务"
-  
   
   sudo mkdir -p /etc/docker
   sudo tee /etc/docker/daemon.json <<-'EOF'
