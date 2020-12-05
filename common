@@ -175,7 +175,7 @@ link实现容器间单向通信：
     实例：
       docker run --name t1 -p 8000:8080 -d -v /usr/webapps:/usr/local/tomcat/webapps tomcat
   
-    docker create --name webpage -v /usr/webapps:/usr/local/tomcat webapps tomcat /bin/true
+    docker create --name webpage -v /usr/webapps:/usr/local/tomcat/webapps tomcat /bin/true
     
     docker run -p 8002:8080 --volumes-from webpage --name t3 -d tomcat
   
