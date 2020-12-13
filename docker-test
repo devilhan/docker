@@ -1,0 +1,58 @@
+实操小练习:
+  准备文件
+    application.yml
+    test.jar  --springboot jar包
+    db.sql
+    上传至服务器某个路径下:/test/test-app
+    在该路径下创建Dockerfile文件：
+      FROM openjdk:8u222-jre   --搭建环境安装jdk
+      WORKDIR /usr/local/test --工作目录 
+      ADD test.jar . 
+      ADD application.yml .
+      ADD application-dev.yml .
+      EXPOSE 80
+      CMD ["java","-jar","test.jar"]  --运行
+     
+    保存后，运行该文件安装镜像: docker build -t test/test-app .
+    
+    切换到db 目录下
+      创建Dockerfile
+        FROM mysql:5.7
+        WORKDIR /docker-entrypoint-initdb.d
+        ADD init-db.sql .
+       
+       docker build -t test/test-db .
+       
+       
+       接下来创建容器:
+          docker run -d -e MYSQL_ROOT_PASSWORD=123456 test/bsbdj-db
+       
+    使用docker-compose创建
+      在test目录下创建docker-compose.yml文件
+      
+      version '3.3'
+      services:
+        db: 
+          build: ./bsbdj-db/
+          restart: always
+          environment:
+            MYSQL_ROOT_PASSWORD: 123456
+        app:
+          build: ./bsbdj-app/
+          depends_on: 
+            - db
+          ports:
+            - "80:80"
+          restart: always
+          
+          
+        运行docker-compose文件
+          docker-compose up -d
+          
+          查看日志
+            docker-compose logs [db|app]
+            
+          关闭
+            docker-compose down
+            
+        
